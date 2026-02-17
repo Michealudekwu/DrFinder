@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+face_env/
+.venv/
+
+# Environment variables (DB password, secret key, etc.)
+.env
+
+# Logs
+*.log
+
+# VS Code settings
+.vscode/
