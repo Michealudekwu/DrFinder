@@ -99,34 +99,34 @@ def register_patient(request):
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def login(request):
-    if request.method == 'GET':
-        return render(request, 'myConfigs/login.html')
+    if request.method == 'POST':
+        email = request.data.get('email')
+        password = request.data.get('password')
 
-    email = request.data.get('email')
-    password = request.data.get('password')
+        user = authenticate(email=email, password=password)
+        if user:
+            token,_ = Token.objects.get_or_create(user=user)
 
-    user = authenticate(email=email, password=password)
-    if user:
-        token,_ = Token.objects.get_or_create(user=user)
+            user_type = None
+            profile_data = None
 
-        user_type = None
-        profile_data = None
+            if hasattr(user, "doctor_profile"):
+                user_type = "doctor"
+                profile_data = DoctorSerializer(user.doctor_profile).data
+            elif hasattr(user, "patient_profile"):
+                user_type = "patient"
+                profile_data = PatientSerializer(user.patient_profile).data
 
-        if hasattr(user, "doctor_profile"):
-            user_type = "doctor"
-            profile_data = DoctorSerializer(user.doctor_profile).data
-        elif hasattr(user, "patient_profile"):
-            user_type = "patient"
-            profile_data = PatientSerializer(user.patient_profile).data
+            return Response({
+                'token': token.key,
+                'username': user.username,
+                'user_type': user_type,
+                'profile': profile_data
+            })
+        else:
+            return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({
-            'token': token.key,
-            'username': user.username,
-            'user_type': user_type,
-            'profile': profile_data
-        })
-    else:
-        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    return render(request, 'myConfigs/login.html')
 
 @api_view(['GET'])
 def running(request):
