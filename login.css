@@ -119,6 +119,7 @@ button {
   background-color: #2e9d8f;
   border: none;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .footter p {
@@ -146,4 +147,8 @@ footer p {
   text-align: center;
   color: gray;
   font-size: 12px;
+}
+
+button:hover {
+  background-color: #2e9d8ebb;
 }
