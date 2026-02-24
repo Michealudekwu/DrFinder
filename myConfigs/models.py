@@ -12,13 +12,14 @@ class Doctor(models.Model):
     postal_code = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=20)
     gender = models.CharField(max_length=10)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name
     
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='patient_profile', null=True, blank=True)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, null=True, blank=True, related_name='patients')
     name = models.CharField(max_length=100)
     age = models.IntegerField()
     gender = models.CharField(max_length=10)

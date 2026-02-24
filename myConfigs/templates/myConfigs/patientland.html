@@ -1,0 +1,171 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="shortcut icon" href="{% static 'myConfigs/icons8-stethoscope-50.png' %}" type="image/x-icon" />
+  </head>
+  <body class="font-sans bg-gray-50">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    <header>
+      <div
+        class="flex items-center justify-between p-2 border-b border-gray-300"
+      >
+        <!-- brand -->
+        <div class="flex gap-3 p- ml-1">
+            <img src="{% static 'myConfigs/icons8-stethoscope-50.png' %}" alt="" width="24px" height="" />
+            <p class="font-extrabold text-[#2e9d8f] text-lg">Patient Portal</p>
+        </div>
+
+        <!-- other side -->
+        <div class="flex items-center gap-4">
+          <p>
+            <span class="text-gray-500">Welcome,</span>
+            <span>{{ patient.name }}</span>
+          </p>
+          <a href="{% url 'login' %}">
+          <button
+            class="flex items-center gap-5 border p-1 pl-3 w-30 rounded-lg border-[#2e9d8e70] hover:bg-[#2ec2ae18]"
+          >
+            <i
+              class="fa-sharp fa-light fa-arrow-right-from-bracket"
+              style="color: rgb(87, 86, 86)"
+            ></i>
+              <p class="font-mono">Logout</p>
+            </button>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- hero section  -->
+    <section>
+      <div class="p-3 ml-1 flex flex-col gap-8">
+        <div class="mt-2">
+          <h3 class="text-2xl font-bold mb-2">Find a Doctor</h3>
+          <p class="text-sm text-gray-500">
+            Browse our network of qualified medical professionals
+          </p>
+        </div>
+
+        <!-- hero search -->
+        <form method="get" action="{% url 'get_doctors' %}" class="flex w-full gap-4 items-end">
+          <!-- Textarea Wrapper -->
+          <div class="relative w-[85%]">
+            <!-- Icon -->
+            <input
+            type="text"
+            name="search"
+            class="w-full border h-8 rounded-lg pl-2 text-sm placeholder:text-sm border-[#2e9d8e70]"
+            placeholder="Search by name or specialty..."
+            value="{{ request.GET.search|default:'' }}">
+            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+              <i class="fa-solid fa-magnifying-glass text-gray-500 text-sm hover:text-gray-700"></i>
+            </button>
+          </div>
+
+          <!-- Location Search (states & cities) -->
+          <div class="w-[22%]">
+            <label class="block text-[11px] font-semibold text-gray-600 mb-1 ml-1 tracking-wide">
+              State or City
+            </label>
+            <div
+              class="relative w-full rounded-full bg-white shadow-sm border border-[#2e9d8e40] hover:border-[#2e9d8f] hover:shadow-md transition-all duration-150 focus-within:ring-2 focus-within:ring-[#2e9d8f]/40"
+            >
+              <i
+                class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-[#2e9d8f] text-xs pointer-events-none"
+              ></i>
+              <input
+                name="location"
+                list="locations"
+                placeholder="All locations"
+                value="{{ request.GET.location }}"
+                class="w-full bg-transparent pl-8 pr-7 py-2 text-xs text-gray-700 rounded-full focus:outline-none"
+              />
+              
+              <span
+                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"
+              >
+                <i class="fa-solid fa-chevron-down"></i>
+              </span>
+            </div>
+            <datalist id="locations">
+              {% for doctor in doctors %}
+              <option value="{{ doctor.city }}, {{ doctor.state }}"></option>
+              {% endfor %}
+            </datalist>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- grid section -->
+    <section>
+      <div
+        class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4 ml-3 p-3"
+      >
+        <!-- grid  -->
+        {% if doctors %}
+        {% for doctor in doctors %}
+        <div class="p-4 border border-[#2e9d8e81] rounded-xl">
+          <div class="flex items-center gap-4">
+            <div
+              class="bg-[#f0f0] w-14 h-14 rounded-full flex justify-center items-center"
+            >
+            <img src="{% static 'myConfigs/icons8-stethoscope-50.png' %}" alt="" width="18px" height="18px" />
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <p>Dr.{{ doctor.name }}</p>
+              <p class="flex items-center gap-2">
+                <span
+                  ><img src="{% static 'myConfigs/icons8-stethoscope-50.png' %}" alt=""
+                  width="18px" height="18px"
+                /></span>
+                <span class="text-sm">{{ doctor.speciality }}</span>
+              </p>
+              <p class="text-gray-500 text-sm">
+                <i
+                  class="fa-thin fa-location-dot"
+                  style="color: rgb(87, 86, 86)"
+                ></i>
+                {{ doctor.city }}, {{ doctor.state }}
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-3">
+            <p class="text-sm w-full mt-3 text-gray-500">
+              {{ doctor.description }}
+            </p>
+
+            <a href="#">
+              <button
+                class="bg-[#2e9d8f] w-full h-10 flex justify-center items-center gap-2 rounded-xl text-white hover:bg-[#28b3a1] hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-150 ease-out"
+              >
+                <i class="fa-solid fa-user"></i>
+                <span>View profile</span>
+              </button>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+      {% else %}
+      <div class="text-center text-gray-500">
+        <p>No doctors found</p>
+      </div>
+      {% endif %}
+      </div>
+    </section>
+  </body>
+</html>
