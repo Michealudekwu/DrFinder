@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login, logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from rest_framework import status
 from .serializers import DoctorSerializer, PatientSerializer
 from .models import Doctor, Patient
@@ -113,13 +113,17 @@ def login(request):
         if user:
             print("Authenticated")
             auth_login(request, user)    
-            messages.success(request, 'Login successful')
             return redirect('get_doctors')
         else:
             messages.error(request, 'Invalid Credentials or User not found')
             return redirect('login')
 
     return render(request, 'myConfigs/login.html', {'messages': messages.get_messages(request)})
+
+
+def logout(request):
+    auth_logout(request)
+    return redirect('login')
 
 @api_view(['GET'])
 def running(request):
