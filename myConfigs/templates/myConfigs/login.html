@@ -4,20 +4,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Patient Portal</title>
     <link rel="stylesheet" href="{% static 'myConfigs/login.css' %}" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
-    <link rel="shortcut icon" href="{% static 'myConfigs/favicon.ico' %}" type="image/x-icon" />
+    <link
+      rel="shortcut icon"
+      href="{% static 'myConfigs/favicon.ico' %}"
+      type="image/x-icon"
+    />
   </head>
   <body>
     <header>
       <!-- bramd -->
       <div class="brand">
-        <img src="{% static 'myConfigs/icons8-stethoscope-50.png' %}" alt="stethoscope" />
-        <h3>DoctorFinder</h3>
+        <img
+          src="{% static 'myConfigs/icons8-stethoscope-50.png' %}"
+          alt="stethoscope"
+        />
+        <h3>Login</h3>
       </div>
 
       <nav>
@@ -33,33 +40,53 @@
       <div class="logbox">
         <div class="fullhead">
           <div class="photo">
-            <img src="{% static 'myConfigs/icons8-stethoscope-50.png' %}" alt="" />
+            <img
+              src="{% static 'myConfigs/icons8-stethoscope-50.png' %}"
+              alt=""
+            />
           </div>
 
           <h3>Welcome Back</h3>
-          <p>Sign in to your DoctorFinder accont</p>
+          <p>Sign in to your Patient Portal account</p>
         </div>
-
+        {% if messages %}
+        <div class="alert-container">
+          {% for message in messages %}
+          <div
+            class="alert-box alert-{{ message.tags }}"
+            data-auto-dismiss="true"
+          >
+            <span class="alert-text">{{ message }}</span>
+            <button type="button" class="alert-close" aria-label="Close">
+              &times;
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
         <!-- input1  -->
-        <div class="mailpas">
-          <p>Email</p>
+        <form action="{% url 'login' %}" method="post">
+          {% csrf_token %}
+          <div class="mailpas">
+            <p>Email</p>
 
-          <div class="mail">
-            <input type="email" placeholder="you@example.com" />
+            <div class="mail">
+              <input type="text" name="username" placeholder="username" />
 
-            <i class="fa-solid fa-envelope"> </i>
+              <i class="fa-solid fa-user"> </i>
+            </div>
+
+            <!-- input2  -->
+            <p>Password</p>
+
+            <div class="mail2">
+              <input type="password" name="password" placeholder="password" />
+
+              <i class="fa-solid fa-lock"> </i>
+            </div>
           </div>
-
-          <!-- input2  -->
-          <p>Password</p>
-
-          <div class="mail2">
-            <input type="email" placeholder="you@example.com" />
-
-            <i class="fa-solid fa-lock"> </i>
-          </div>
-        </div>
-        <button>Sign in</button>
+          <button type="submit" name="submit">Sign in</button>
+        </form>
 
         <div class="footter">
           <p>
@@ -69,8 +96,36 @@
       </div>
     </main>
 
-    <footer>
-      <p>&copy; 2026 DoctorFinder. All rights reserved.</p>
+    <footer class="">
+      <p class="flex justify-center items-center">
+        &copy; 2026 Patient Portal. All rights reserved.
+      </p>
     </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(
+          '.alert-box[data-auto-dismiss="true"]',
+        );
+
+        alerts.forEach(function (alert) {
+          const closeBtn = alert.querySelector(".alert-close");
+
+          if (closeBtn) {
+            closeBtn.addEventListener("click", function () {
+              alert.style.display = "none";
+            });
+          }
+
+          // Auto-hide after 4 seconds
+          setTimeout(function () {
+            alert.classList.add("alert-hide");
+            setTimeout(function () {
+              alert.style.display = "none";
+            }, 400); // matches CSS transition duration
+          }, 4000);
+        });
+      });
+    </script>
   </body>
 </html>

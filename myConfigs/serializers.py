@@ -9,7 +9,7 @@ class DoctorSerializer(serializers.ModelSerializer):
         exclude = ['user']
     
     def get_Patients(self, obj):
-        patients = obj.patient_set.all()
+        patients = obj.patients.all()
         return PatientSerializer(patients, many=True).data
 
 class PatientSerializer(serializers.ModelSerializer):

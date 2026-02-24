@@ -1,13 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login, logout
 from rest_framework import status
 from .serializers import DoctorSerializer, PatientSerializer
 from .models import Doctor, Patient
+from django.db.models import Q
+from django.contrib import messages
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -23,8 +26,7 @@ def register_doctor(request):
     phone_number = request.data.get('phone_number')
     postal_code = request.data.get('postal_code')
     gender = request.data.get('gender')
-
-
+    description = request.data.get('description')
 
     if User.objects.filter(username = username).exists():
         return Response({'error' : 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
@@ -44,7 +46,8 @@ def register_doctor(request):
         city = city,
         phone_number = phone_number,
         postal_code = postal_code,
-        gender = gender
+        gender = gender,
+        description = description
     )
 
     token = Token.objects.create(user=user)
@@ -67,7 +70,8 @@ def register_patient(request):
     state = request.data.get('state')
     phone_number = request.data.get('phone_number')
     postal_code = request.data.get('postal_code')
-    gender = request.get('gender')
+    gender = request.data.get('gender')
+    age = request.data.get('age')
 
     if User.objects.filter(username = username).exists():
         return Response({'error' : 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
@@ -86,7 +90,8 @@ def register_patient(request):
         city = city,
         phone_number = phone_number,
         postal_code = postal_code,
-        gender = gender
+        gender = gender,
+        age = age
     )
 
     token = Token.objects.create(user=user)
@@ -96,44 +101,31 @@ def register_patient(request):
         'profile': PatientSerializer(patient).data
     }, status=status.HTTP_201_CREATED)
 
-@api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+
 def login(request):
     if request.method == 'POST':
-        email = request.data.get('email')
-        password = request.data.get('password')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
-        user = authenticate(email=email, password=password)
+        print(username, password)
+
+        user = authenticate(username=username, password=password)
         if user:
-            token,_ = Token.objects.get_or_create(user=user)
-
-            user_type = None
-            profile_data = None
-
-            if hasattr(user, "doctor_profile"):
-                user_type = "doctor"
-                profile_data = DoctorSerializer(user.doctor_profile).data
-            elif hasattr(user, "patient_profile"):
-                user_type = "patient"
-                profile_data = PatientSerializer(user.patient_profile).data
-
-            return Response({
-                'token': token.key,
-                'username': user.username,
-                'user_type': user_type,
-                'profile': profile_data
-            })
+            print("Authenticated")
+            auth_login(request, user)    
+            messages.success(request, 'Login successful')
+            return redirect('get_doctors')
         else:
-            return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
+            messages.error(request, 'Invalid Credentials or User not found')
+            return redirect('login')
 
-    return render(request, 'myConfigs/login.html')
+    return render(request, 'myConfigs/login.html', {'messages': messages.get_messages(request)})
 
 @api_view(['GET'])
 def running(request):
     return Response("API is Running")
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def get_records(request):
     doctors = Doctor.objects.all()
     # Patient = Patient.objects.all()
@@ -178,12 +170,49 @@ def get_my_patient_profile(request):
         return Response({'error':'Not a patient account'}, status=status.HTTP_403_FORBIDDEN)
     
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
+@login_required
 def get_doctors(request):
+    search = request.GET.get('search', '').strip()
+    location = request.GET.get('location', '').strip()
+
+    print("Search:", search)
+    print("Location:", location)
+
     doctors = Doctor.objects.all()
+
+    if search:
+        doctors = doctors.filter(
+            Q(name__icontains=search) |
+            Q(speciality__icontains=search)
+        )
+
+    if location:
+        if ',' in location:
+            city, state = [x.strip() for x in location.split(',', 1)]
+            doctors = doctors.filter(
+                Q(city__icontains=city) |
+                Q(state__icontains=state)
+            )
+        else:
+            doctors = doctors.filter(
+                Q(city__icontains=location) |
+                Q(state__icontains=location)
+            )
+
+    try:
+        patient = Patient.objects.get(user=request.user)
+    except Patient.DoesNotExist:
+        messages.error(request, 'Not a patient account')
+        return redirect('login')
+
     docSerializer = DoctorSerializer(doctors, many=True)
-    return Response(docSerializer.data)
+    patient_profile = PatientSerializer(patient)
+
+    return render(request, 'myConfigs/patientland.html', {
+        'doctors': docSerializer.data, 
+        'patient': patient_profile.data,
+    })
 
 
 @api_view(["PUT"])

@@ -54,6 +54,69 @@ a {
   width: 450px;
   margin-bottom: 50px;
 }
+
+.alert-container {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  padding-right: 24px;
+}
+
+.alert-box {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-left: 4px solid;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.alert-text {
+  flex: 1;
+}
+
+.alert-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.alert-error,
+.alert-danger {
+  background-color: #ffe5e5;
+  color: #b00020;
+  border-color: #b00020;
+}
+
+.alert-success {
+  background-color: #e6f6f2;
+  color: #1b6e5a;
+  border-color: #1b6e5a;
+}
+
+.alert-info {
+  background-color: #e5f2ff;
+  color: #0b4f8a;
+  border-color: #0b4f8a;
+}
+
+.alert-warning {
+  background-color: #fff7e5;
+  color: #8a5a0b;
+  border-color: #8a5a0b;
+}
+
+.alert-hide {
+  opacity: 0;
+  transform: translateY(-6px);
+}
 .fullhead {
   margin-left: -48px;
   padding-top: 24px;
@@ -119,6 +182,7 @@ button {
   background-color: #2e9d8f;
   border: none;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .footter p {
@@ -146,4 +210,8 @@ footer p {
   text-align: center;
   color: gray;
   font-size: 12px;
+}
+
+button:hover {
+  background-color: #2e9d8ebb;
 }
